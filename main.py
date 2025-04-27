@@ -1,20 +1,3 @@
-# This takes a student’s questionnaire responses, computes
-# RIASEC scores according to the provided scoring key,
-# then recommends the top 5 university majors and explains why
-# they fit the student’s personality and preferences.
-
-# Technical considerations:
-# - The model is a locally hosted Zephyr-7B (Q5_0 quantized) running via llama.cpp for maximum inference efficiency.
-# - The system uses LlamaCpp with n_ctx=4096 for a balance between context length and resource usage.
-# - For cloud deployment (right now Google Cloud right now), resource optimization is critical:
-#   * Set n_gpu_layers to >0 if GPU is available, or keep it 0 for CPU-only.
-#   * Set n_batch appropriately (eg 64–128) to optimize token throughput vs. memory usage.
-#   * Enable use_mmap and use_mlock for faster memory-mapped model loading.
-# - FastAPI is used and I'm exposing a single POST endpoint, for the recommendation generation itself.
-# - Dockerization is recommended, using a slim Python base image and minimal dependencies for smaller images and faster startup.
-# - CPU throttling and minimum resource allocations are advised for cost-effective cloud deployment.
-# - Logging token usage per request can be added later for monitoring and billing optimization if needed.
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
@@ -150,12 +133,15 @@ prompt = PromptTemplate(
     template=template
 )
 
-# Initialize the LLM and chain. Temperature must be 0, so that output will be deterministic if the same information is given.
-# Possible TODO: add n_gpu_layers and n_batch parameters to the LlamaCpp constructor for resource optimization
+# Initialize the LLM with CPU-only configuration
 llm = LlamaCpp(
     model_path=MODEL_PATH,
     n_ctx=4096,
-    temperature=0.0
+    temperature=0.0,
+    n_gpu_layers=0,  # Set to 0 for CPU-only
+    n_batch=512,     # Adjusted batch size for CPU processing
+    use_mmap=True,   # Enable memory mapping for faster model loading
+    use_mlock=False  # Disable memory locking since we're using mmap
 )
 chain = LLMChain(llm=llm, prompt=prompt)
 
