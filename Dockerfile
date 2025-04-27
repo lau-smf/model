@@ -21,8 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /app/models
 
 # Download the Zephyr model from Hugging Face
-RUN wget https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/resolve/main/zephyr-7b-beta.Q2_0.gguf \
-    -O /app/models/zephyr-7b-beta.Q5_0.gguf
+RUN wget https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/resolve/main/zephyr-7b-beta.Q2_K.gguf
 
 # Copy application code
 COPY main.py /app/
