@@ -11,14 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-RUN pip install --no-cache-dir \
-    fastapi==0.104.1 \
-    uvicorn==0.23.2 \
-    pydantic==2.4.2 \
-    python-dotenv==1.0.0 \
-    langchain==0.0.312 \
-    llama-cpp-python==0.2.11
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies from requirements file
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Create directories
 RUN mkdir -p /app/models
